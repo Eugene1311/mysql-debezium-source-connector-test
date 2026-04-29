@@ -44,7 +44,7 @@ services:
       CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
       CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components,/etc/data/connect-jars
     volumes:
-      - ./connect:/etc/kafka-connect/jars
+      - ./connector-plugins:/etc/kafka-connect/jars
 
   mysql:
     image: mysql:8.4.9
