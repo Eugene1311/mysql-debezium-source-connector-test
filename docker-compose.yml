@@ -26,6 +26,7 @@ services:
       - kafka
     ports:
       - 8083:8083
+      - 5083:5083
       - 5084:5084
     environment:
       CONNECT_BOOTSTRAP_SERVERS: "kafka:29092"
@@ -44,6 +45,8 @@ services:
       CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
       CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
       CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components,/etc/kafka-connect/jars
+      KAFKA_OPTS: >
+        -javaagent:/opt/prometheus-jmx-exporter/jmx_prometheus_javaagent-1.0.1.jar=5083:/opt/prometheus-jmx-exporter/kafka-connect.yml
       KAFKA_JMX_OPTS: >
         -Dcom.sun.management.jmxremote=true
         -Dcom.sun.management.jmxremote.authenticate=false
@@ -55,6 +58,7 @@ services:
         -Dcom.sun.management.jmxremote.rmi.port=5084
     volumes:
       - ./connector-plugins:/etc/kafka-connect/jars
+      - ./prometheus-jmx-exporter:/opt/prometheus-jmx-exporter
 
   mysql:
     image: mysql:8.4.9
@@ -79,21 +83,29 @@ services:
       CONSOLE_CONFIG_FILE: |
         kafka:
           brokers: ["kafka:29092"]
-        # kafkaConnect:
-          # enabled: false
-          # clusters:
-          #   - name: connect
-          #     url: "http://connect:8083"
-          #     tls:
-          #       enabled: false
-          #     username: "connect-user"
-          #     password: "connect-password"
-          #     token: "optional-token"
     ports:
       - 8080:8080
     depends_on:
       - kafka
       - connect
+
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus:/etc/prometheus
+    depends_on:
+      - connect
+
+  grafana:
+    image: grafana/grafana:13.0
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/
+    depends_on:
+      - prometheus
 
 volumes:
   db_data:
