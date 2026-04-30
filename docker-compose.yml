@@ -3,6 +3,7 @@ name: mysql-debezium-source-connector
 services:
   kafka:
     image: confluentinc/cp-kafka:8.1.2
+    restart: on-failure
     ports:
       - "9092:9092"
     environment:
@@ -91,6 +92,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.47.0
+    restart: on-failure
     ports:
       - 9090:9090
     volumes:
@@ -100,12 +102,15 @@ services:
 
   grafana:
     image: grafana/grafana:13.0
+    restart: on-failure
     ports:
       - 3000:3000
     volumes:
-      - ./grafana:/etc/grafana/provisioning/
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
 
 volumes:
   db_data:
+  grafana_data:
