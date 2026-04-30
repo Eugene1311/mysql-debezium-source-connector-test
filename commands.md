@@ -8,6 +8,11 @@ Update connector properties:
 curl -i -X PUT -H "Content-Type:application/json" http://localhost:8083/connectors/inventory-connector/config -d @connector/mysql-connector-update.json
 ```
 
+Remove connector:
+```bash
+curl -i -X DELETE http://localhost:8083/connectors/inventory-connector
+```
+
 Read binlog file:
 ```bash
 mysqlbinlog --read-from-remote-server --host=127.0.0.1 --port=3306 \
